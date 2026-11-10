@@ -1,106 +1,106 @@
-# SF-08 — Runtime Foundation
+# SF-08 — 运行时基础能力规范
 
-- **Status:** Proposed
-- **Version:** 1.0
-- **Owner:** Software Architecture
-- **Related:** SF-06, SF-07, SF-09, SF-10
+- **状态：** 提案中
+- **版本：** 1.0
+- **负责人：** 软件架构
+- **关联规范：** SF-06、SF-07、SF-09、SF-10
 
-## 1. Purpose
+## 1. 目的
 
-Define reusable runtime responsibilities and boundaries for lifecycle, storage, networking, IPC and background work without pretending that every OS has identical semantics.
+定义生命周期、存储、网络、IPC 和后台任务等可复用运行时职责与边界，同时不假设所有操作系统具有相同语义。
 
-## 2. Runtime module boundaries
+## 2. 运行时模块边界
 
-| Module | Responsibility | Must not own |
+| 模块 | 职责 | 不应负责 |
 |---|---|---|
-| Lifecycle | Start/stop/readiness and shutdown coordination | Product business rules |
-| Configuration | Validated configuration snapshots | Secret vault implementation |
-| Logging | Structured event emission and routing | Product analytics policy |
-| Diagnostics | Health snapshot and support bundle orchestration | Arbitrary user-file collection |
-| Storage | App data/cache/temp path policy and persistence adapters | Product domain schema |
-| Network | Shared connection, timeout and retry primitives | Product protocol semantics |
-| IPC | Authenticated local process communication | Unrelated business authorization |
-| Scheduler | Background tasks, cancellation and deadlines | Unbounded work queues |
-| Platform adapter | OS-specific implementation | Redefinition of common contract |
+| Lifecycle | 启动/停止/就绪及关闭协调 | 产品业务规则 |
+| Configuration | 配置校验与快照 | 密钥保险库实现 |
+| Logging | 结构化事件输出与路由 | 产品分析策略 |
+| Diagnostics | 健康快照和诊断包编排 | 任意用户文件收集 |
+| Storage | 应用数据/缓存/临时路径与持久化适配 | 产品领域 Schema |
+| Network | 通用连接、超时和重试机制 | 产品协议语义 |
+| IPC | 本地进程间通信与认证 | 无关业务授权 |
+| Scheduler | 后台任务、取消和截止时间 | 无界任务队列 |
+| Platform Adapter | OS 专属实现 | 重新定义公共契约 |
 
-Projects may combine modules when scale is small, but ownership and interfaces should remain understandable.
+小型项目可以合并部分模块，但职责和接口仍应清晰。
 
-## 3. Lifecycle contract
+## 3. 生命周期契约
 
-A long-running application/service SHOULD define:
-- initialization order and dependency readiness;
-- startup timeout and failure behavior;
-- readiness and liveness;
-- graceful shutdown and deadline;
-- cancellation propagation;
-- restart policy;
-- recovery after abnormal termination.
+长期运行的应用/服务应该定义：
+- 初始化顺序和依赖就绪条件；
+- 启动超时和失败行为；
+- 就绪与存活状态；
+- 优雅关闭和截止时间；
+- 取消信号传播；
+- 重启策略；
+- 异常终止后的恢复行为。
 
-Services should be supervised by the native platform manager where available (e.g. Windows Service Control Manager, systemd, launchd). Mobile and web applications must respect their host lifecycle and background-execution limits.
+在平台支持时，服务应由原生平台管理器监管（例如 Windows Service Control Manager、systemd、launchd）。移动和 Web 应用必须遵循宿主生命周期及后台执行限制。
 
-## 4. Storage contract
+## 4. 存储契约
 
-Separate:
-- immutable application binaries/resources;
-- user data;
-- machine/device state;
-- configuration;
-- cache;
-- temporary files;
-- logs and diagnostics.
+应区分：
+- 不可变应用二进制/资源；
+- 用户数据；
+- 机器/设备状态；
+- 配置；
+- 缓存；
+- 临时文件；
+- 日志和诊断数据。
 
-Define ownership, permissions, backup, retention and cleanup for each. Cache MUST be safely disposable. User data MUST NOT be removed during ordinary upgrade/uninstall unless explicitly requested and documented.
+每一类都必须定义所有权、权限、备份、保留和清理策略。缓存必须能够安全删除。普通升级/卸载期间不得删除用户数据，除非用户明确请求且已有文档说明。
 
-## 5. Network contract
+## 5. 网络契约
 
-Common networking primitives SHOULD standardize:
-- connection and operation timeouts;
-- cancellation;
-- bounded retry with exponential backoff and jitter;
-- idempotency rules;
-- proxy configuration;
-- TLS verification;
-- error classification;
-- observability and correlation.
+通用网络能力应该统一：
+- 连接和操作超时；
+- 取消；
+- 有上限的指数退避和随机抖动重试；
+- 幂等性规则；
+- 代理配置；
+- TLS 验证；
+- 错误分类；
+- 可观测性与关联信息。
 
-Retry policy MUST account for operation idempotency. Do not automatically retry non-idempotent operations without an idempotency key or equivalent protection.
+重试策略必须考虑操作是否幂等。非幂等操作没有幂等 Key 或等效保护时，不得自动重试。
 
-## 6. IPC contract
+## 6. IPC 契约
 
-Local IPC MUST define:
-- transport and endpoint discovery;
-- message framing and schema version;
-- authentication/authorization;
-- request correlation and timeout;
-- payload limits;
-- backpressure and queue limits;
-- shutdown behavior;
-- compatibility policy.
+本地 IPC 必须定义：
+- 传输方式和端点发现；
+- 消息帧和 Schema 版本；
+- 认证/授权；
+- 请求关联和超时；
+- 载荷大小限制；
+- 背压和队列限制；
+- 关闭行为；
+- 兼容性策略。
 
-Never assume that local IPC is trusted merely because it is local.
+不得仅因为 IPC 是本地通信就默认其可信。
 
-## 7. Background work
+## 7. 后台任务
 
-Tasks SHOULD support cancellation, deadlines, bounded concurrency and explicit ownership. Real-time/media paths require separate latency and resource budgets; generic task queues MUST NOT introduce unpredictable blocking into time-sensitive pipelines.
+任务应该支持取消、截止时间、并发上限和明确的责任归属。实时/媒体路径需要独立的延迟和资源预算；通用任务队列不得给时间敏感路径引入不可预测的阻塞。
 
-## 8. Platform adapter rules
+## 8. 平台适配器规则
 
-A common interface defines semantics, not a lowest-common-denominator implementation. Each adapter documents:
-- supported OS/runtime versions;
-- unavailable capabilities;
-- permission requirements;
-- lifecycle differences;
-- thread/process constraints;
-- failure mapping;
-- tests proving contract conformance.
+公共接口定义语义，而不是能力最低的平台交集。每个适配器必须记录：
+- 支持的 OS/运行时版本；
+- 不可用能力；
+- 权限要求；
+- 生命周期差异；
+- 线程/进程约束；
+- 失败映射；
+- 证明契约一致性的测试。
 
-Avoid exposing platform-specific types in shared business APIs unless the platform is intentionally part of the public contract.
+除非平台本身就是公共契约的一部分，否则应避免在共享业务 API 中暴露平台专属类型。
 
-## 9. Acceptance checklist
+## 9. 验收清单
 
-- [ ] Lifecycle and shutdown behavior are defined.
-- [ ] Storage classes and ownership are explicit.
-- [ ] Network timeouts/retries respect idempotency.
-- [ ] IPC has authentication and bounded resources.
-- [ ] Platform adapters document capability gaps.
-- [ ] Critical runtime paths have measurable resource/latency budgets.
+- [ ] 生命周期和关闭行为已定义。
+- [ ] 存储类别和所有权明确。
+- [ ] 网络超时/重试遵循幂等性。
+- [ ] IPC 具备认证和资源上限。
+- [ ] 平台适配器记录能力差异。
+- [ ] 关键运行路径具有可衡量的资源/延迟预算。

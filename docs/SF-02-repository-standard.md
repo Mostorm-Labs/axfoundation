@@ -1,95 +1,95 @@
-# SF-02 — Repository Standard
+# SF-02 — 代码仓库管理规范
 
-- **Status:** Proposed
-- **Version:** 1.0
-- **Owner:** Software Engineering
-- **Related:** SF-01, SF-03, SF-10
+- **状态：** 提案中
+- **版本：** 1.0
+- **负责人：** 软件工程
+- **关联规范：** SF-01、SF-03、SF-10
 
-## 1. Purpose
+## 1. 目的
 
-Provide a predictable repository structure and collaboration workflow without imposing a monorepo or a specific language.
+建立可预测的仓库结构和协作工作流，同时不强制采用 Monorepo 或某一种编程语言。
 
-## 2. Repository baseline
+## 2. 仓库基线
 
-Every maintained product repository SHOULD contain:
-- `README.md`: purpose, status, quick start and supported platforms;
-- `LICENSE` or a clear proprietary notice;
-- `CONTRIBUTING.md`: development and review workflow;
-- `CHANGELOG.md` or release-note source;
-- `docs/`: architecture, decisions, operations and compatibility;
-- build and dependency lock files;
-- automated tests;
-- CI workflow definitions;
-- security reporting instructions appropriate to repository visibility.
+每个持续维护的产品仓库应该包含：
+- `README.md`：项目用途、状态、快速开始和支持平台；
+- `LICENSE` 或明确的专有软件声明；
+- `CONTRIBUTING.md`：开发与评审流程；
+- `CHANGELOG.md` 或发布说明来源；
+- `docs/`：架构、决策、运维和兼容性文档；
+- 构建文件和依赖锁定文件；
+- 自动化测试；
+- CI 工作流定义；
+- 与仓库公开范围相适应的安全问题报告说明。
 
-Generated outputs, credentials, local IDE state and machine-specific paths MUST NOT be committed unless explicitly required and documented.
+除非有明确需求并记录原因，否则不得提交生成产物、凭据、本地 IDE 状态和机器专属路径。
 
-## 3. Repository organization
+## 3. 仓库组织
 
-Choose repository boundaries based on ownership, release cadence, dependency direction and independent deployment. Avoid splitting code into repositories solely for theoretical reuse. A shared component should have an explicit owner, API and release policy.
+根据模块所有权、发布节奏、依赖方向和独立部署需求划分仓库。不能仅为了理论上的复用而拆分代码仓库。共享组件必须有明确负责人、API 和版本发布策略。
 
-For multi-platform projects, keep common code and platform adapters visibly separated. Do not hide platform-specific behavior behind ambiguous conditional compilation spread throughout business logic.
+多平台项目应清晰区分公共代码和平台适配器。不要将平台行为差异隐藏在散落于业务逻辑中的条件编译或平台判断中。
 
-## 4. Git workflow
+## 4. Git 工作流
 
-Recommended default:
-- protect the default branch;
-- use short-lived feature/fix branches;
-- require Pull Requests for shared branches;
-- require CI checks before merge;
-- require at least one qualified reviewer for production code;
-- prohibit force-push to protected release branches;
-- use signed tags or equivalent release provenance where supported.
+推荐默认规则：
+- 保护默认分支；
+- 使用短生命周期的功能/修复分支；
+- 通过 Pull Request 合并共享分支；
+- 合并前必须通过 CI 检查；
+- 生产代码至少需要一名具备相应职责的评审人；
+- 受保护的发布分支禁止强制推送；
+- 在支持的情况下使用签名 Tag 或等效发布溯源机制。
 
-Branch naming SHOULD be descriptive, e.g. `feature/<scope>`, `fix/<issue>`, `docs/<scope>`.
+分支命名应该清晰表达意图，例如 `feature/<scope>`、`fix/<issue>`、`docs/<scope>`。
 
-Commit messages SHOULD state intent and scope. Conventional Commits MAY be adopted if release automation benefits from it.
+Commit 信息应该说明变更意图和范围。若有利于发布自动化，可以采用 Conventional Commits。
 
-## 5. Pull Request requirements
+## 5. Pull Request 要求
 
-A PR SHOULD include:
-- problem and intended outcome;
-- scope and non-goals;
-- implementation summary;
-- test evidence;
-- compatibility/data migration impact;
-- security/privacy impact;
-- operational or rollout impact;
-- screenshots or recordings for UI changes where useful;
-- linked issue/decision.
+PR 应包含：
+- 问题背景和预期结果；
+- 变更范围及非目标；
+- 实现摘要；
+- 测试证据；
+- 兼容性/数据迁移影响；
+- 安全/隐私影响；
+- 运维或发布影响；
+- 有帮助时提供 UI 截图或录屏；
+- 关联 Issue 或决策记录。
 
-PRs MUST NOT merge with known failing required checks unless an approved, time-limited exception is recorded.
+已知必需检查失败时不得合并，除非记录了经过批准且有时限的例外。
 
-## 6. Dependency hygiene
+## 6. 依赖管理
 
-- Pin direct dependencies and commit lockfiles where supported.
-- Record compiler, SDK and toolchain versions.
-- Prefer reproducible dependency sources.
-- Review license and security implications of new dependencies.
-- Define ownership and update cadence for critical dependencies.
-- Avoid floating production dependencies.
-- Document vendored code and its upstream revision.
+- 在支持的情况下锁定直接依赖并提交 Lockfile。
+- 记录编译器、SDK 和工具链版本。
+- 优先使用可重复获取的依赖来源。
+- 评估新增依赖的许可证和安全影响。
+- 为关键依赖定义负责人和升级节奏。
+- 避免生产环境使用浮动依赖版本。
+- 记录 Vendored 代码及其上游修订版本。
 
-Dependency updates SHOULD be automated where practical, but automated PRs still require CI and review.
+在可行时应该自动提交依赖升级 PR，但自动化 PR 仍然需要 CI 和人工评审。
 
-## 7. Secrets and configuration
+## 7. 密钥与配置
 
-Secrets MUST NOT be committed. Use GitHub Actions secrets, an approved secret manager or protected environment variables. Example configuration files MUST contain placeholders only.
+不得将密钥提交到仓库。应使用 GitHub Actions Secrets、批准的密钥管理服务或受保护的环境变量。示例配置只能包含占位符。
 
-## 8. Branch and release protection
+## 8. 分支与发布保护
 
-Production repositories SHOULD enforce:
-- required status checks;
-- review requirements;
-- restricted direct pushes;
-- release tag policy;
-- CODEOWNERS for critical areas where practical.
+生产仓库应该启用：
+- 必需状态检查；
+- 评审要求；
+- 直接推送限制；
+- 发布 Tag 策略；
+- 在可行时通过 CODEOWNERS 定义关键目录负责人。
 
-## 9. Repository readiness checklist
+## 9. 仓库就绪清单
 
-- [ ] README explains build, test and supported targets.
-- [ ] Dependencies and toolchains are pinned or constrained.
-- [ ] PR review and required CI are enabled.
-- [ ] No secrets or generated artifacts are committed.
-- [ ] Release and compatibility documentation exists.
-- [ ] Critical ownership boundaries are visible.
+- [ ] README 说明构建、测试和支持目标平台。
+- [ ] 依赖和工具链已锁定或约束。
+- [ ] PR 评审和必需 CI 已启用。
+- [ ] 没有提交密钥或生成产物。
+- [ ] 已有发布和兼容性文档。
+- [ ] 关键模块的责任边界清晰。

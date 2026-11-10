@@ -1,100 +1,100 @@
-# SF-09 — Security & Identity
+# SF-09 — 安全与身份规范
 
-- **Status:** Proposed
-- **Version:** 1.0
-- **Owner:** Product Security / Software Engineering
-- **Related:** SF-03, SF-04, SF-05, SF-06, SF-07, SF-08
+- **状态：** 提案中
+- **版本：** 1.0
+- **负责人：** 产品安全 / 软件工程
+- **关联规范：** SF-03、SF-04、SF-05、SF-06、SF-07、SF-08
 
-## 1. Purpose
+## 1. 目的
 
-Establish baseline security requirements for software build, distribution, runtime identity, device communication, licensing and support operations.
+建立软件构建、分发、运行时身份、设备通信、授权和售后操作的基础安全要求。
 
-## 2. Threat model
+## 2. 威胁建模
 
-Each product MUST identify:
-- assets to protect;
-- trust boundaries and privileged components;
-- users, devices, services and external dependencies;
-- attacker capabilities relevant to deployment;
-- security-critical operations;
-- recovery and incident response assumptions.
+每个产品必须识别：
+- 需要保护的资产；
+- 信任边界和高权限组件；
+- 用户、设备、服务和外部依赖；
+- 与部署场景相关的攻击者能力；
+- 安全关键操作；
+- 恢复和事件响应假设。
 
-A desktop utility, cloud service, room appliance and firmware updater have different threat models. Do not copy a generic checklist without assessing actual exposure.
+桌面工具、云服务、会议室设备和固件更新器具有不同威胁模型。不能不分析实际暴露面就复制通用清单。
 
-## 3. Identity
+## 3. 身份
 
-Distinguish:
-- product identity;
-- installation identity;
-- device identity;
-- user identity;
-- service/workload identity.
+必须区分：
+- 产品身份；
+- 安装实例身份；
+- 设备身份；
+- 用户身份；
+- 服务/工作负载身份。
 
-A device identifier SHOULD be stable for the intended lifecycle but MUST NOT be treated as proof of authenticity by itself. Avoid relying solely on easily copied hardware serials or MAC addresses. Where device authenticity matters, use cryptographic credentials protected by TPM, secure element, OS keystore or an equivalent mechanism where available.
+设备标识应在预期生命周期内保持稳定，但本身不能作为真实性证明。不能只依赖容易复制的硬件序列号或 MAC 地址来证明设备可信。在需要设备真实性的场景中，应使用由 TPM、安全芯片、OS Keystore 或等效机制保护的密码学凭据。
 
-Define provisioning, rotation, revocation, factory reset, replacement and recovery behavior.
+必须定义凭据的生产配置、轮换、吊销、恢复出厂、设备更换和恢复行为。
 
-## 4. Authentication and authorization
+## 4. 认证与授权
 
-- Authenticate remote peers and services.
-- Use TLS with certificate validation for network APIs.
-- Apply least privilege to processes, services, CI jobs and operators.
-- Separate authentication (who/what) from authorization (allowed action).
-- Enforce authorization at the resource/action boundary.
-- Define credential expiry, rotation and revocation.
-- Protect local IPC against unauthorized local processes.
+- 对远程通信对端和服务进行身份认证。
+- 网络 API 使用 TLS 并验证证书。
+- 对进程、服务、CI 任务和运维人员采用最小权限。
+- 区分认证（是谁/什么）和授权（允许执行什么操作）。
+- 在资源/操作边界执行授权。
+- 定义凭据过期、轮换和吊销。
+- 保护本地 IPC，避免未授权本地进程访问。
 
-## 5. Secrets and key management
+## 5. 密钥与凭据管理
 
-Secrets MUST NOT be embedded in source code, public binaries, logs or ordinary configuration. Use a platform credential store or managed secret service. Signing keys and production credentials MUST be access-controlled, auditable and separated from normal build execution.
+密钥不得嵌入源代码、公开二进制、日志或普通配置文件。使用平台凭据存储或托管密钥服务。签名密钥和生产凭据必须进行访问控制、审计，并与普通构建执行环境隔离。
 
-Define key generation, storage, rotation, backup, revocation and incident response. A key compromise must have a documented recovery path.
+必须定义密钥生成、存储、轮换、备份、吊销和事件响应流程。密钥泄露必须有明确恢复路径。
 
-## 6. Software supply chain
+## 6. 软件供应链
 
-Release pipelines SHOULD:
-- pin dependencies and toolchains;
-- scan dependencies and known vulnerabilities;
-- record licenses;
-- generate an SBOM for shipped products where practical;
-- produce build provenance;
-- sign production artifacts;
-- protect release credentials;
-- restrict workflow permissions.
+发布流水线应该：
+- 锁定依赖和工具链；
+- 扫描依赖和已知漏洞；
+- 记录许可证；
+- 在可行时为交付产品生成 SBOM；
+- 生成构建溯源信息；
+- 签名生产制品；
+- 保护发布凭据；
+- 限制工作流权限。
 
-Consumers MUST verify update authenticity before applying packages (SF-04/SF-05).
+制品使用方必须在应用更新包之前验证其真实性（见 SF-04/SF-05）。
 
-## 7. Secure defaults
+## 7. 安全默认值
 
-- Disable debug endpoints and verbose sensitive logging in production.
-- Bind local admin interfaces narrowly.
-- Validate all external inputs.
-- Set resource limits for network and IPC payloads.
-- Use secure random generation for tokens and identifiers requiring unpredictability.
-- Fail closed for authentication and signature verification.
-- Do not expose secrets in crash or diagnostic bundles.
+- 生产环境关闭调试端点和包含敏感信息的详细日志。
+- 严格限制本地管理接口的监听范围。
+- 校验所有外部输入。
+- 对网络和 IPC 载荷设置资源限制。
+- 对需要不可预测性的 Token 和标识使用安全随机数生成。
+- 认证和签名校验失败时必须拒绝操作。
+- 不得在崩溃或诊断包中暴露密钥。
 
-## 8. Licensing
+## 8. 软件授权
 
-License enforcement SHOULD be isolated from product business logic behind a stable API. Define online activation, offline activation, rehost, factory provisioning, recovery, clock/tamper assumptions and server unavailability behavior. Do not equate device identity with license entitlement.
+授权校验应该通过稳定 API 与产品业务逻辑隔离。应定义在线激活、离线激活、设备迁移/重新绑定、工厂预置、恢复、时钟/篡改假设以及服务端不可用时的行为。不得将设备身份等同于授权权益。
 
-## 9. Security incident handling
+## 9. 安全事件处理
 
-Products MUST define a reporting and response path for:
-- compromised signing credentials;
-- vulnerable dependencies;
-- unauthorized device/service access;
-- update-channel compromise;
-- exposed customer secrets or personal data.
+产品必须定义以下事件的报告和响应路径：
+- 签名凭据泄露；
+- 依赖漏洞；
+- 未授权设备/服务访问；
+- 更新渠道被攻陷；
+- 客户密钥或个人数据泄露。
 
-The process should cover triage, containment, key revocation, fixed release, customer communication and evidence preservation.
+流程应覆盖分级、遏制、密钥吊销、修复版本、客户沟通和证据保留。
 
-## 10. Acceptance checklist
+## 10. 验收清单
 
-- [ ] Threat model and trust boundaries exist.
-- [ ] Device/user/service identities are distinguished.
-- [ ] Secrets are stored and rotated safely.
-- [ ] Production artifacts are authenticated.
-- [ ] CI permissions and signing keys are protected.
-- [ ] Diagnostics are privacy-reviewed.
-- [ ] Security incident and key-compromise recovery are documented.
+- [ ] 存在威胁模型和信任边界。
+- [ ] 设备/用户/服务身份已区分。
+- [ ] 密钥安全存储并可轮换。
+- [ ] 生产制品经过真实性验证。
+- [ ] CI 权限和签名密钥受到保护。
+- [ ] 诊断信息通过隐私审查。
+- [ ] 安全事件及密钥泄露恢复流程已记录。

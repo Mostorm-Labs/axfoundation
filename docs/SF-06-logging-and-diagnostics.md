@@ -1,17 +1,17 @@
-# SF-06 — Logging & Diagnostics
+# SF-06 — 日志与诊断规范
 
-- **Status:** Proposed
-- **Version:** 1.0
-- **Owner:** Software Operations
-- **Related:** SF-03, SF-05, SF-08, SF-09
+- **状态：** 提案中
+- **版本：** 1.0
+- **负责人：** 软件运维
+- **关联规范：** SF-03、SF-05、SF-08、SF-09
 
-## 1. Purpose
+## 1. 目的
 
-Make software behavior observable and customer issues diagnosable while protecting privacy and limiting operational overhead.
+让软件行为可观测、客户问题可诊断，同时保护隐私并控制运行开销。
 
-## 2. Structured log event
+## 2. 结构化日志事件
 
-Applications SHOULD emit structured logs. A common event shape is:
+应用应该输出结构化日志。统一事件格式示例：
 
 ```json
 {
@@ -30,84 +30,89 @@ Applications SHOULD emit structured logs. A common event shape is:
 }
 ```
 
-Field names and severity semantics SHOULD remain stable across languages. Platform-native logs may be collected in addition to the common format.
+不同语言中的字段名称和严重级别语义应该保持稳定。除公共格式外，可以同时采集平台原生日志。
 
-## 3. Severity
+## 3. 日志级别
 
-| Level | Meaning |
+| 级别 | 含义 |
 |---|---|
-| TRACE | Fine-grained execution detail; disabled by default in production |
-| DEBUG | Diagnostic detail for developers/support |
-| INFO | Expected lifecycle and business events |
-| WARN | Recoverable abnormal condition or degraded behavior |
-| ERROR | Operation failed; process may continue |
-| FATAL | Critical failure; process/service cannot safely continue |
+| TRACE | 细粒度执行细节；生产环境默认关闭 |
+| DEBUG | 面向开发和售后的诊断信息 |
+| INFO | 预期内的生命周期和业务事件 |
+| WARN | 可恢复的异常状态或降级行为 |
+| ERROR | 操作失败，但进程可能继续运行 |
+| FATAL | 严重故障，进程无法安全继续 |
 
-Do not log the same error repeatedly at every layer. Log at the point with useful context and propagate structured error information.
+不要在每一层重复记录同一个错误。应在具备有效上下文的位置记录，并通过结构化错误信息向上层传递。
 
-## 4. Required context
+## 4. 必要上下文
 
-Where available, logs SHOULD include product/build identity, module, event, stable error code, timestamp and correlation/trace ID. Device identifiers MUST be pseudonymous or minimized in exported data unless operationally necessary and authorized.
+在可用时，日志应该包含产品/构建身份、模块、事件、稳定错误码、时间戳和关联/Trace ID。导出数据中的设备标识必须匿名化或最小化，除非业务确有必要且已获授权。
 
-Timestamps SHOULD be UTC and machine-readable. Monotonic clocks SHOULD be used for durations and ordering within a process.
+时间戳应该使用 UTC 和机器可读格式。计算持续时间及进程内顺序时应该使用单调时钟。
 
-## 5. Storage and retention
+## 5. 存储与保留
 
-Each product MUST define:
-- log location and access permissions;
-- maximum file size and total storage budget;
-- rotation policy;
-- retention period;
-- behavior when storage is full;
-- export mechanism;
-- dynamic log-level control if supported.
+每个产品必须定义：
+- 日志位置和访问权限；
+- 单文件大小上限和总存储预算；
+- 滚动策略；
+- 保留期限；
+- 存储空间不足时的行为；
+- 导出机制；
+- 支持时的动态日志级别控制。
 
-Logging MUST NOT exhaust disk space or block critical real-time paths. Sensitive values, tokens, passwords, private keys, personal data and session contents MUST NOT be logged.
+日志不得耗尽磁盘，也不得阻塞关键实时路径。密码、Token、私钥、个人数据和会话内容不得写入日志。
 
-## 6. Error taxonomy
+## 6. 错误分类
 
-Use stable, namespaced error codes. Example:
-- `COMMON-1xxx`: configuration, storage, permissions and common runtime;
-- `UPDATE-1xxx`: download, verification, apply and rollback;
-- `DEVICE-1xxx`: hardware discovery and initialization;
-- product-specific prefixes for domain failures.
+使用稳定且带命名空间的错误码。示例：
+- `COMMON-1xxx`：配置、存储、权限和通用运行时；
+- `UPDATE-1xxx`：下载、验证、安装和回滚；
+- `DEVICE-1xxx`：硬件发现和初始化；
+- 产品领域使用各自的专属前缀。
 
-Error codes MUST have documented meaning, retryability, user impact and diagnostic guidance. Do not reuse a code for a different failure.
+错误码必须记录含义、是否可重试、用户影响和诊断建议。不得将同一个错误码重新用于不同故障。
 
-## 7. Crash and health reporting
+## 7. 崩溃与健康状态报告
 
-Where platform capabilities permit, capture:
-- crash dumps/minidumps or OS crash reports;
-- exception and stack trace;
-- product/build identity;
-- process uptime and restart count;
-- relevant non-sensitive runtime state.
+在平台能力允许时，采集：
+- Crash Dump/Minidump 或 OS 崩溃报告；
+- 异常信息和堆栈；
+- 产品/构建身份；
+- 进程运行时长和重启次数；
+- 相关且不含敏感信息的运行状态。
 
-Health checks SHOULD distinguish liveness (process responds), readiness (can serve work) and dependency health (required services/devices are available). A process running is not proof that the product is healthy.
+健康检查应该区分：
+- **Liveness（存活）：** 进程是否有响应；
+- **Readiness（就绪）：** 是否能够提供工作能力；
+- **Dependency Health（依赖健康）：** 必需服务/设备是否可用。
 
-## 8. Diagnostic bundle
+进程存在并不代表产品健康。
 
-A support bundle SHOULD include, subject to consent and redaction:
-- application logs;
-- crash reports;
-- software/build/package versions;
-- OS, architecture and relevant hardware summary;
-- update/install history;
-- sanitized configuration;
-- network diagnostics appropriate to the product;
-- health/status snapshots.
+## 8. 诊断包
 
-The bundle MUST include a manifest describing collected files, time range and redaction status. Collection MUST avoid credentials, personal content and unrelated user files. User confirmation SHOULD be required before upload or external sharing.
+在用户知情和脱敏的前提下，支持诊断包应该包含：
+- 应用日志；
+- 崩溃报告；
+- 软件/构建/安装包版本；
+- OS、架构和相关硬件摘要；
+- 更新/安装历史；
+- 脱敏配置；
+- 与产品相关的网络诊断；
+- 健康状态快照。
 
-## 9. Remote telemetry
+诊断包必须包含 Manifest，说明收集文件、时间范围和脱敏状态。收集过程不得包含凭据、个人内容或无关用户文件。上传或外部共享前应该取得用户确认。
 
-Telemetry collection MUST have a defined purpose, data minimization, retention, access control and customer/privacy policy. Diagnostic logging and product analytics are different data categories and should not be conflated.
+## 9. 远程遥测
 
-## 10. Acceptance checklist
+遥测采集必须明确目的、数据最小化原则、保留期限、访问控制和客户/隐私政策。诊断日志与产品分析数据是不同类别，不应混为一谈。
 
-- [ ] Structured logs and stable error codes exist.
-- [ ] Rotation, size and retention limits are configured.
-- [ ] Sensitive values are redacted.
-- [ ] Crash/health strategy is documented.
-- [ ] Diagnostic bundle is useful and privacy-reviewed.
-- [ ] Support can identify exact product/build from diagnostics.
+## 10. 验收清单
+
+- [ ] 存在结构化日志和稳定错误码。
+- [ ] 配置了滚动、大小和保留限制。
+- [ ] 敏感信息经过脱敏。
+- [ ] 已定义崩溃与健康检查策略。
+- [ ] 诊断包具备实用性并通过隐私审查。
+- [ ] 售后能够通过诊断信息识别准确的产品/构建版本。

@@ -1,108 +1,108 @@
-# SF-01 — Software Versioning
+# SF-01 — 软件版本管理规范
 
-- **Status:** Proposed
-- **Version:** 1.0
-- **Owner:** Software Engineering
-- **Related:** SF-04, SF-05, SF-07, SF-10
+- **状态：** 提案中
+- **版本：** 1.0
+- **负责人：** 软件工程
+- **关联规范：** SF-04、SF-05、SF-07、SF-10
 
-## 1. Purpose
+## 1. 目的
 
-Define stable, unambiguous version identities for products, builds, protocols, persisted data and firmware. A single application version MUST NOT be used as a substitute for every independently evolving contract.
+为产品、构建、协议、持久化数据和固件定义稳定且无歧义的版本身份。不能用一个应用版本号代替所有具有独立演进周期的契约版本。
 
-## 2. Version dimensions
+## 2. 版本维度
 
-| Dimension | Example | Changes when |
+| 维度 | 示例 | 变更时机 |
 |---|---|---|
-| Product version | 2.4.1 | User-visible product release changes |
-| Build identity | 20261110.1842+gabc1234 | A particular build is produced |
-| Package revision | 2.4.1-3 | Packaging changes without product behavior change |
-| Protocol version | 1.3 | Wire contract changes under its compatibility policy |
-| Data/schema version | 5 | Persisted representation or migration contract changes |
-| Firmware version | 1.8.0 | Device firmware release changes |
-| Updater version | 1.2.0 | Update engine changes |
-| SDK/API version | 3.1.0 | Public library contract changes |
+| 产品版本 | 2.4.1 | 用户可感知的产品版本发生变化 |
+| 构建身份 | 20261110.1842+gabc1234 | 每次产生一个具体构建 |
+| 包修订号 | 2.4.1-3 | 仅打包方式变化，产品行为不变 |
+| 协议版本 | 1.3 | 通信契约按其兼容策略发生变化 |
+| 数据/Schema 版本 | 5 | 持久化表示或迁移契约变化 |
+| 固件版本 | 1.8.0 | 设备固件发布 |
+| 更新器版本 | 1.2.0 | 更新引擎变化 |
+| SDK/API 版本 | 3.1.0 | 公共库契约变化 |
 
-These dimensions MUST be independently managed where they have independent compatibility lifecycles.
+当这些维度具有独立兼容生命周期时，必须独立管理。
 
-## 3. Product versioning
+## 3. 产品版本
 
-Use Semantic Versioning (MAJOR.MINOR.PATCH) for public product releases where practical:
-- MAJOR: incompatible change to a published public contract.
-- MINOR: backward-compatible capability addition.
-- PATCH: backward-compatible fixes.
+在适用的公开产品版本中，采用语义化版本（MAJOR.MINOR.PATCH）：
+- MAJOR：已发布公共契约发生不兼容变化。
+- MINOR：以向后兼容方式增加能力。
+- PATCH：向后兼容的修复。
 
-Pre-release identifiers MAY be used, e.g. `2.5.0-beta.2`. Build metadata MAY identify CI run or commit but MUST NOT be used to determine precedence.
+可以使用预发布标识，例如 `2.5.0-beta.2`。可以使用构建元数据标识 CI 运行或提交，但不能用它判断版本优先级。
 
-If a platform ecosystem requires a different package version format, maintain an explicit mapping to the canonical product version.
+如果平台生态要求使用不同的包版本格式，必须明确记录其与规范产品版本之间的映射关系。
 
-## 4. Build identity
+## 4. 构建身份
 
-Every distributable build MUST expose:
-- product identifier and product version;
-- build number or immutable build ID;
-- source commit SHA;
-- build timestamp in UTC;
-- target OS/platform and CPU architecture;
-- build configuration (release/debug and relevant feature profile);
-- package format and package revision;
-- dependency lock/snapshot identity where available.
+每个可分发构建必须能够提供：
+- 产品标识和产品版本；
+- 构建编号或不可变构建 ID；
+- 源代码 Commit SHA；
+- UTC 构建时间；
+- 目标 OS/平台及 CPU 架构；
+- 构建配置（Release/Debug 及相关功能配置）；
+- 包格式和包修订号；
+- 可用时的依赖锁定/快照身份。
 
-Build identity MUST be immutable. Rebuilding the same version with different contents MUST produce a distinguishable build identity and artifact digest.
+构建身份必须不可变。同一版本重新构建但内容不同，必须产生可区分的构建身份和制品摘要。
 
-## 5. Compatibility dimensions
+## 5. 兼容性维度
 
-Version comparison alone is insufficient. Projects MUST separately define:
-- minimum and maximum supported OS/runtime versions;
-- CPU architecture and hardware compatibility;
-- client/server protocol compatibility;
-- persisted data/schema compatibility;
-- plugin/SDK/API compatibility;
-- firmware/bootloader compatibility;
-- updater/package compatibility.
+仅比较版本号不足以描述兼容性。项目必须分别定义适用的：
+- OS/运行时最低和最高支持版本；
+- CPU 架构与硬件兼容性；
+- 客户端/服务端协议兼容性；
+- 持久化数据/Schema 兼容性；
+- 插件/SDK/API 兼容性；
+- 固件/Bootloader 兼容性；
+- 更新器/安装包兼容性。
 
-Capability negotiation SHOULD be used for optional protocol features rather than relying only on client version strings.
+对于可选协议能力，应该优先采用能力协商，而不是只依赖客户端版本字符串。
 
-## 6. Version compatibility policy
+## 6. 版本兼容策略
 
-Each product MUST publish a compatibility policy that specifies:
-- supported version window;
-- minimum supported upgrade source;
-- whether skipped-version upgrades are supported;
-- data migration behavior;
-- rollback constraints;
-- end-of-support policy;
-- behavior for unknown or unsupported versions.
+每个产品必须发布兼容策略，说明：
+- 支持的版本窗口；
+- 最低允许升级来源版本；
+- 是否支持跨版本跳跃升级；
+- 数据迁移行为；
+- 回滚限制；
+- 停止支持策略；
+- 对未知或不支持版本的处理方式。
 
-New versions SHOULD read supported historical data. Unknown fields and extensions MUST be preserved when safe, or writes MUST be blocked to avoid destructive round trips. Unsupported semantics MUST NOT be silently reinterpreted.
+新版本应该读取支持范围内的历史数据。在安全可行时，必须保留未知字段和扩展；否则必须阻止可能造成破坏的写入。不得静默重新解释不支持的语义。
 
-## 7. Version sources of truth
+## 7. 版本信息的唯一来源
 
-The product repository MUST define one authoritative version source or a deterministic generation process. Package metadata, UI display, update manifests and diagnostics MUST derive from that source rather than manually maintained copies.
+产品仓库必须定义唯一权威版本源，或确定性版本生成流程。安装包元数据、UI 展示、更新 Manifest 和诊断信息必须从该来源生成，不能手工维护多个副本。
 
-A release tag MUST point to the exact source revision used for release. Tags for published releases MUST NOT be moved or reused.
+正式发布 Tag 必须指向实际发布所使用的精确源代码修订。已发布 Tag 不得移动或重复使用。
 
-## 8. Release metadata
+## 8. 发布元数据
 
-Release metadata SHOULD include product version, build identity, channel, target platform, architecture, minimum OS, protocol/schema compatibility declarations, artifact URL, size, digest, signature metadata, release notes and publication time.
+发布元数据应该包含产品版本、构建身份、渠道、目标平台、架构、最低 OS 版本、协议/Schema 兼容声明、制品 URL、大小、摘要、签名信息、发布说明和发布时间。
 
-See SF-04 for the manifest contract.
+Manifest 契约见 SF-04。
 
-## 9. Deprecation and end of support
+## 9. 弃用与停止支持
 
-A public contract MUST NOT be removed without:
-1. identifying affected consumers and data;
-2. publishing a deprecation notice;
-3. defining a migration or replacement;
-4. defining the earliest removal release;
-5. validating the supported upgrade path.
+移除公共契约前必须：
+1. 识别受影响的消费者和数据；
+2. 发布弃用通知；
+3. 定义迁移方案或替代方案；
+4. 明确最早移除的版本；
+5. 验证受支持的升级路径。
 
-Security emergencies MAY require accelerated deprecation, with explicit impact and mitigation notes.
+安全紧急情况可以加速弃用，但必须记录影响和缓解措施。
 
-## 10. Acceptance checklist
+## 10. 验收清单
 
-- [ ] Product and build versions are distinct.
-- [ ] Protocol, schema and firmware versions are independently represented where applicable.
-- [ ] Version is generated from an authoritative source.
-- [ ] Artifacts identify source commit and target platform.
-- [ ] Compatibility windows and EOL policy are documented.
-- [ ] Release tags are immutable.
+- [ ] 产品版本和构建版本已区分。
+- [ ] 协议、Schema 和固件版本在适用时独立管理。
+- [ ] 版本来自权威来源。
+- [ ] 制品包含源代码 Commit 和目标平台信息。
+- [ ] 兼容窗口及 EOL 策略已记录。
+- [ ] 发布 Tag 不可变。

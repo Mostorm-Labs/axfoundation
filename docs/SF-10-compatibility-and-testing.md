@@ -1,121 +1,121 @@
-# SF-10 — Compatibility & Testing
+# SF-10 — 兼容性与测试规范
 
-- **Status:** Proposed
-- **Version:** 1.0
-- **Owner:** Quality Engineering / Software Architecture
-- **Related:** SF-01 through SF-09
+- **状态：** 提案中
+- **版本：** 1.0
+- **负责人：** 质量工程 / 软件架构
+- **关联规范：** SF-01 至 SF-09
 
-## 1. Purpose
+## 1. 目的
 
-Make compatibility an explicit product contract and a repeatable release verification activity. Compatibility is multidimensional; a single application version comparison is insufficient.
+将兼容性定义为明确的产品契约，并使其成为可重复执行的发布验证活动。兼容性具有多个维度，不能仅比较应用版本号。
 
-## 2. Compatibility dimensions
+## 2. 兼容性维度
 
-Every product defines applicable dimensions:
+每个产品必须定义适用的维度：
 
-| Dimension | Example question |
+| 维度 | 示例问题 |
 |---|---|
-| OS/runtime | Does this release support the declared Windows/Linux versions? |
-| CPU architecture | x64, ARM64, ARMv7, etc. |
-| Hardware | Which device/board/revision variants are supported? |
-| Protocol | Can this client communicate with the supported server/peer versions? |
-| Persisted data | Can this version read and safely write historical data? |
-| API/SDK | Are public interfaces source/binary compatible? |
-| Firmware/bootloader | Is the firmware compatible with bootloader and peripherals? |
-| Installer/updater | Can this package upgrade the installed version safely? |
-| Configuration | Can old configuration be migrated without loss? |
-| Plugin/extension | Are extension contracts and runtime dependencies compatible? |
+| OS/运行时 | 当前版本是否支持声明的 Windows/Linux 版本？ |
+| CPU 架构 | 是否支持 x64、ARM64、ARMv7 等？ |
+| 硬件 | 支持哪些设备/主板/硬件修订？ |
+| 协议 | 当前客户端能否与受支持版本的服务端/对端通信？ |
+| 持久化数据 | 当前版本能否读取并安全写入历史数据？ |
+| API/SDK | 公共接口是否保持源码/二进制兼容？ |
+| 固件/Bootloader | 固件是否兼容 Bootloader 和外围设备？ |
+| 安装器/更新器 | 当前安装包能否安全升级已安装版本？ |
+| 配置 | 旧配置能否无损迁移？ |
+| 插件/扩展 | 扩展契约和运行时依赖是否兼容？ |
 
-## 3. Compatibility matrix
+## 3. 兼容性矩阵
 
-Maintain a versioned matrix with:
-- product/client/server version;
-- OS/runtime and architecture;
-- hardware/firmware revision;
-- protocol/schema version;
-- supported operations;
-- known limitations;
-- support status and end-of-support date;
-- test evidence link.
+必须维护版本化矩阵，记录：
+- 产品/客户端/服务端版本；
+- OS/运行时和架构；
+- 硬件/固件修订；
+- 协议/Schema 版本；
+- 受支持的操作；
+- 已知限制；
+- 支持状态和停止支持日期；
+- 测试证据链接。
 
-Use explicit states such as **supported**, **supported with limitations**, **unsupported**, and **not tested**. Do not present untested combinations as supported.
+使用明确状态，例如**支持**、**有限支持**、**不支持**、**未测试**。不得将未经测试的组合标记为支持。
 
-## 4. Compatibility principles
+## 4. 兼容性原则
 
-- New releases SHOULD read all historical data formats within the declared support policy.
-- Unknown optional fields SHOULD be preserved across read/write cycles where feasible.
-- If an older client cannot preserve unknown data, it MUST warn and prevent destructive save or use a documented safe mode.
-- New protocol fields SHOULD be optional with safe defaults when possible.
-- Breaking protocol changes require explicit negotiation, versioned endpoints or adapters.
-- Capability negotiation is preferred for optional features.
-- Schema migration MUST be deterministic, testable and observable.
-- Binary rollback and data rollback are separate concerns.
-- Compatibility guarantees have a defined support window; "forever" must not be assumed without an explicit archival strategy.
+- 新版本应该读取声明支持范围内的历史数据格式。
+- 在可行时，未知可选字段应该在读写往返中保留。
+- 如果旧客户端无法保留未知数据，必须警告并阻止破坏性保存，或进入明确说明的安全模式。
+- 新协议字段应该尽量采用可选字段和安全默认值。
+- 破坏性协议变化必须通过显式协商、版本化端点或适配器处理。
+- 对可选能力优先使用能力协商。
+- Schema 迁移必须确定、可测试且可观测。
+- 二进制回滚与数据回滚是不同问题。
+- 兼容承诺必须具有明确支持窗口；除非具备明确归档策略，否则不能默认承诺“永久兼容”。
 
-## 5. Test layers
+## 5. 测试层次
 
-| Test layer | What it proves |
+| 测试层次 | 验证目标 |
 |---|---|
-| Unit | Local logic and boundary conditions |
-| Contract | API/message/schema behavior |
-| Integration | Components work together |
-| System/E2E | Product workflows operate end to end |
-| Compatibility | Declared version/platform combinations work |
-| Migration | Historical data/config can be upgraded safely |
-| Install/update | Install, upgrade, interruption and recovery work |
-| Security | Threat-specific controls and abuse cases |
-| Performance/stability | Resource, latency and long-running behavior meet targets |
-| Hardware-in-loop | Real hardware/driver/device behavior works |
+| Unit Test | 局部逻辑和边界条件 |
+| Contract Test | API/消息/Schema 行为 |
+| Integration Test | 组件协同工作 |
+| System/E2E Test | 产品端到端工作流 |
+| Compatibility Test | 声明的版本/平台组合 |
+| Migration Test | 历史数据/配置能否安全升级 |
+| Install/Update Test | 安装、升级、中断和恢复 |
+| Security Test | 与威胁模型相关的控制和攻击场景 |
+| Performance/Stability Test | 资源、延迟和长期运行行为 |
+| Hardware-in-the-Loop | 真实硬件/驱动/设备行为 |
 
-## 6. Golden corpus
+## 6. 黄金样本集（Golden Corpus）
 
-For file formats, protocols, configuration and migrations, retain representative fixtures from released versions. The corpus SHOULD include:
-- normal cases;
-- boundary and maximum-size cases;
-- optional/unknown fields;
-- deprecated fields;
-- malformed or truncated inputs;
-- real-world anonymized samples where legally and operationally permitted.
+对于文件格式、协议、配置和迁移，应保留来自正式发布版本的代表性测试样本。样本集应该包含：
+- 正常场景；
+- 边界和最大尺寸场景；
+- 可选/未知字段；
+- 已弃用字段；
+- 格式错误或截断输入；
+- 在合法且运维允许的前提下脱敏的真实样本。
 
-Fixtures must identify their source version and expected behavior. Avoid including customer secrets or personal data.
+测试样本必须标记来源版本和预期行为。不得包含客户密钥或个人数据。
 
-## 7. Required release scenarios
+## 7. 必需发布场景
 
-Where applicable, test:
-- current release reading historical supported data;
-- older supported clients communicating with the new server;
-- new client communicating with older supported server;
-- unknown field preservation;
-- unsupported feature downgrade/read-only behavior;
-- upgrade from minimum supported source version;
-- skipped-version upgrade;
-- interrupted download/install;
-- post-update health check and rollback;
-- configuration/database migration and recovery;
-- OS/architecture/hardware boundary combinations.
+在适用时，必须测试：
+- 当前版本读取受支持的历史数据；
+- 旧版受支持客户端连接新版服务端；
+- 新版客户端连接旧版受支持服务端；
+- 未知字段保留；
+- 不支持的新功能降级/只读行为；
+- 从最低支持来源版本升级；
+- 跨版本跳跃升级；
+- 下载/安装中断；
+- 更新后健康检查和回滚；
+- 配置/数据库迁移与恢复；
+- OS/架构/硬件边界组合。
 
-## 8. Test evidence and release decision
+## 8. 测试证据与发布决策
 
-Each release MUST identify:
-- tested product/build identity;
-- target matrix and excluded combinations;
-- test suite and result;
-- known failures and approved exceptions;
-- migration/rollback evidence;
-- unresolved compatibility risks;
-- release approver.
+每次发布必须明确：
+- 被测产品/构建身份；
+- 测试矩阵和排除的组合；
+- 测试套件及结果；
+- 已知失败和经批准的例外；
+- 迁移/回滚证据；
+- 未解决的兼容性风险；
+- 发布批准人。
 
-A passing build is not equivalent to a compatible release. A test result is meaningful only when its tested artifact and environment are identifiable.
+构建通过不等于兼容性发布通过。只有被测制品和环境都可识别时，测试结果才有意义。
 
-## 9. Support lifecycle
+## 9. 支持生命周期
 
-Each product defines support windows for product versions, OS versions, hardware revisions, protocols and data schemas. End-of-support requires advance notice where feasible and a migration path. Security or platform constraints may shorten support with documented risk and communication.
+每个产品必须定义产品版本、OS 版本、硬件修订、协议和数据 Schema 的支持窗口。停止支持前，在可行时应提前通知并提供迁移路径。安全或平台约束可能要求缩短支持期，但必须记录风险并进行沟通。
 
-## 10. Acceptance checklist
+## 10. 验收清单
 
-- [ ] Compatibility dimensions and support windows are declared.
-- [ ] Matrix distinguishes supported from untested.
-- [ ] Historical fixtures are retained.
-- [ ] Upgrade, migration and rollback paths are tested.
-- [ ] Unknown data behavior is safe.
-- [ ] Release evidence identifies exact artifact and environment.
+- [ ] 已声明兼容性维度和支持窗口。
+- [ ] 矩阵区分已支持与未测试。
+- [ ] 保留历史测试样本。
+- [ ] 已测试升级、迁移和回滚路径。
+- [ ] 未知数据处理安全。
+- [ ] 发布证据能够识别准确制品和环境。

@@ -1,113 +1,113 @@
-# SF-05 — Installation & Update
+# SF-05 — 软件安装与更新规范
 
-- **Status:** Proposed
-- **Version:** 1.0
-- **Owner:** Client Platform Engineering
-- **Related:** SF-01, SF-04, SF-06, SF-07, SF-09, SF-10
+- **状态：** 提案中
+- **版本：** 1.0
+- **负责人：** 客户端平台工程
+- **关联规范：** SF-01、SF-04、SF-06、SF-07、SF-09、SF-10
 
-## 1. Purpose
+## 1. 目的
 
-Define safe and observable installation, download, update, uninstall and recovery behavior across desktop, mobile, web and embedded deployment models.
+定义桌面、移动、Web 和嵌入式部署模式下安全且可观测的安装、下载、更新、卸载和恢复行为。
 
-## 2. Separate responsibilities
+## 2. 职责分离
 
-- **Distribution:** identifies available releases and provides artifacts (SF-04).
-- **Download manager:** transfers bytes and reports transfer state.
-- **Installer/package manager:** applies platform-native installation semantics.
-- **Updater/orchestrator:** coordinates eligibility, staging, shutdown, install, health confirmation and recovery.
-- **Application:** reports version and health; it should not overwrite its own active executable image.
+- **分发服务：** 识别可用版本并提供制品（SF-04）。
+- **下载管理器：** 传输文件并报告传输状态。
+- **安装器/包管理器：** 执行平台原生安装语义。
+- **更新器/编排器：** 协调更新资格检查、暂存、关闭进程、安装、健康确认和恢复。
+- **应用程序：** 报告版本与健康状态；不应覆盖自身正在运行的可执行文件。
 
-These may be separate processes or platform services. Their ownership and trust boundaries must be explicit.
+这些能力可以由独立进程或平台服务承担，但职责和信任边界必须明确。
 
-## 3. Update state machine
+## 3. 更新状态机
 
-Recommended states:
+推荐状态：
 
 `IDLE → CHECKING → AVAILABLE → DOWNLOADING → VERIFIED → STAGED → APPLYING → HEALTH_CHECK → SUCCEEDED`
 
-Failure/recovery states include `CANCELLED`, `FAILED_RETRYABLE`, `FAILED_FINAL`, `ROLLBACK_REQUIRED` and `ROLLED_BACK`.
+失败/恢复状态包括 `CANCELLED`、`FAILED_RETRYABLE`、`FAILED_FINAL`、`ROLLBACK_REQUIRED` 和 `ROLLED_BACK`。
 
-Each transition MUST have:
-- an owning component;
-- durable state where interruption is possible;
-- timeout and retry policy;
-- user-visible or diagnosable outcome;
-- cleanup behavior.
+每次状态转换必须明确：
+- 负责该转换的组件；
+- 可能中断时需要持久化的状态；
+- 超时和重试策略；
+- 用户可见或可诊断的结果；
+- 清理行为。
 
-## 4. Eligibility checks
+## 4. 更新资格检查
 
-Before download/install, validate:
-- product and package identity;
-- current and target versions;
-- platform, architecture and hardware model;
-- minimum OS/runtime/bootloader;
-- free disk space and power requirements where relevant;
-- package dependencies;
-- channel and rollout eligibility;
-- license or authorization if required;
-- whether the update is blocked by an active operation.
+下载/安装前必须校验：
+- 产品和安装包身份；
+- 当前版本与目标版本；
+- 平台、架构和硬件型号；
+- 最低 OS/运行时/Bootloader 版本；
+- 可用磁盘空间及适用的电源要求；
+- 包依赖；
+- 发布渠道和灰度资格；
+- 必要时的授权/许可证；
+- 是否有正在执行且禁止更新的操作。
 
-Unsupported combinations MUST be rejected with a stable error code.
+不支持的组合必须通过稳定错误码明确拒绝。
 
-## 5. Download requirements
+## 5. 下载要求
 
-Where the platform permits, the download manager SHOULD support:
-- HTTPS with certificate validation;
-- resumable/range downloads;
-- progress and throughput reporting;
-- bounded retries with backoff and jitter;
-- cancellation;
-- timeout and stalled-transfer detection;
-- mirror fallback;
-- proxy support;
-- temporary-file staging;
-- digest and signature verification.
+在平台允许时，下载管理器应该支持：
+- 使用 HTTPS 并验证证书；
+- 断点续传/Range 下载；
+- 进度和吞吐量报告；
+- 有上限的重试、退避和随机抖动；
+- 取消；
+- 超时和传输停滞检测；
+- 镜像源切换；
+- 代理配置；
+- 临时文件暂存；
+- 摘要和签名验证。
 
-A partial download MUST NOT be treated as an installable artifact.
+不完整下载不得被视为可安装制品。
 
-## 6. Apply and recovery
+## 6. 安装与恢复
 
-- Verify authenticity and integrity before execution.
-- Use platform-native installation mechanisms where possible.
-- Do not replace an executing binary in place.
-- Preserve user data and configuration separately from replaceable application files.
-- Record update transaction state before destructive steps.
-- Define behavior after power loss, process crash or device reboot.
-- Run post-install health checks before marking success.
-- Keep a known-good recovery path when the platform supports it.
+- 执行前验证真实性和完整性。
+- 尽可能使用平台原生安装机制。
+- 不得原地替换正在执行的二进制文件。
+- 用户数据和配置必须与可替换的应用文件分离保存。
+- 在破坏性步骤之前记录更新事务状态。
+- 定义断电、进程崩溃或设备重启后的行为。
+- 在标记成功之前执行安装后健康检查。
+- 在平台支持时保留已知可用的恢复路径。
 
-Desktop applications may use an external updater/launcher. Linux services may coordinate with package managers or systemd. Embedded devices SHOULD consider signed A/B images, boot-attempt limits and automatic fallback. Mobile apps MUST follow app-store/MDM and OS restrictions. Web applications use deployment/versioning and cache invalidation strategies rather than native installers.
+桌面应用可以使用外部 Updater/Launcher。Linux 服务可以协调包管理器或 systemd。嵌入式设备应该考虑签名 A/B 镜像、启动尝试次数限制和自动回退。移动应用必须遵循应用商店/MDM 和 OS 限制。Web 应用使用部署版本管理和缓存失效策略，而不是原生安装器。
 
-## 7. Database and user-data migration
+## 7. 数据库与用户数据迁移
 
-Application update and user-data migration are separate operations. Migrations MUST be versioned, ordered, observable and tested against representative historical data. Destructive migrations require backup/recovery strategy. Rollback after a schema migration may require a forward-fix rather than binary downgrade.
+应用更新和用户数据迁移是两个独立操作。迁移必须有版本、有顺序、可观测，并使用有代表性的历史数据进行测试。破坏性迁移必须有备份/恢复策略。Schema 迁移后回滚可能需要正向修复，而不是简单降级二进制。
 
-Never assume that reinstalling an older application safely reverses a newer data migration.
+不得假设重新安装旧版应用就能安全撤销新版数据迁移。
 
-## 8. Update policy
+## 8. 更新策略
 
-Each product MUST define:
-- manual/automatic update behavior;
-- user consent and maintenance windows;
-- mandatory update conditions;
-- skipped-version support;
-- offline update path where required;
-- channel selection and downgrade policy;
-- update retry/backoff;
-- recovery and support procedure.
+每个产品必须定义：
+- 手动/自动更新行为；
+- 用户确认和维护窗口；
+- 强制更新条件；
+- 是否支持跨版本跳跃升级；
+- 必要时的离线更新路径；
+- 渠道选择和降级策略；
+- 更新重试/退避；
+- 恢复和售后流程。
 
-Security-critical forced updates require a documented policy and clear user/device impact.
+安全关键强制更新必须有明确策略，并说明对用户/设备的影响。
 
-## 9. Security
+## 9. 安全要求
 
-Updater components are privileged security-sensitive software. They MUST authenticate update metadata, verify signatures, prevent downgrade attacks where required, protect temporary files and avoid executing untrusted paths. Signing keys MUST remain outside client devices.
+Updater 是具有较高权限的安全敏感组件。必须认证更新元数据、验证签名、防止必要场景下的降级攻击、保护临时文件，并避免执行不可信路径中的程序。签名密钥不得存放在客户端设备上。
 
-## 10. Acceptance checklist
+## 10. 验收清单
 
-- [ ] Update state machine and owner are documented.
-- [ ] Eligibility and compatibility checks exist.
-- [ ] Integrity and signature are verified before apply.
-- [ ] Interrupted download/apply behavior is tested.
-- [ ] Health confirmation is required before success.
-- [ ] Recovery/rollback limits are explicit.
-- [ ] Data migration and binary rollback are treated separately.
+- [ ] 更新状态机及责任组件已定义。
+- [ ] 更新资格和兼容性检查已实现。
+- [ ] 安装前验证完整性和签名。
+- [ ] 已测试下载/安装中断行为。
+- [ ] 成功状态必须经过健康检查确认。
+- [ ] 恢复/回滚能力边界明确。
+- [ ] 数据迁移与二进制回滚分别处理。

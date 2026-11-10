@@ -1,63 +1,55 @@
-# AX Foundation
+# AX Foundation（软件基础能力体系）
 
-**Company-wide Software Foundation Standards**
+**Mostorm-Labs 公司级软件工程标准**
 
-AX Foundation defines the engineering standards, reusable contracts, tooling boundaries, and platform adapters shared by software products developed by Mostorm-Labs.
+AX Foundation 用于定义公司各软件产品共同遵循的工程规范、公共契约、工具边界与平台适配原则。
 
-The goal is not to force every product into one language or framework. The goal is to make projects consistent in the areas that should be consistent: version identity, repository hygiene, build and release evidence, distribution, installation and update safety, diagnostics, configuration, runtime contracts, security, and compatibility.
+我们的目标不是强制所有产品使用同一种语言或框架，而是统一真正应该统一的部分：版本标识、仓库管理、构建与发布证据、软件分发、安装与更新安全、日志诊断、配置管理、运行时契约、安全以及兼容性。
 
-## Status
+## 当前状态
 
-- Specification set: **v1.0 — Initial baseline**
-- Authority: **Proposed; pending engineering review and adoption**
-- Scope: new software projects and materially changed existing projects
-- Normative terms: **MUST**, **MUST NOT**, **SHOULD**, **SHOULD NOT**, and **MAY** are used in their usual standards meaning.
+- 规范集：**v1.0 初始基线**
+- 权威状态：**提案中，待工程评审与采纳**
+- 适用范围：新软件项目，以及发生重大变更的存量项目
+- 规范用语：**必须（MUST）**、**禁止（MUST NOT）**、**应该（SHOULD）**、**不应该（SHOULD NOT）**、**可以（MAY）**具有通常的规范性含义。
 
-These documents are a starting baseline, not a claim that every platform implementation already exists. Platform-specific constraints and exceptions must be documented rather than hidden.
+这些文档是初始工程基线，并不代表所有平台实现已经存在。平台约束和例外必须明确记录，不能隐藏在实现细节中。
 
-## Documents
+## 规范目录
 
-| ID | Standard | Scope |
+| 编号 | 规范 | 范围 |
 |---|---|---|
-| SF-00 | [Foundation Charter](docs/SF-00-foundation-charter.md) | Purpose, principles, governance and adoption |
-| SF-01 | [Software Versioning](docs/SF-01-software-versioning.md) | Product/build/schema/protocol versions and compatibility policy |
-| SF-02 | [Repository Standard](docs/SF-02-repository-standard.md) | Repository layout, Git workflow, review and dependency hygiene |
-| SF-03 | [Build & CI/CD](docs/SF-03-build-and-cicd.md) | Reproducible builds, pipeline stages, artifacts and release gates |
-| SF-04 | [Release & Distribution](docs/SF-04-release-and-distribution.md) | Artifact identity, manifests, channels, storage and rollout |
-| SF-05 | [Installation & Update](docs/SF-05-installation-and-update.md) | Install, download, update, recovery and rollback |
-| SF-06 | [Logging & Diagnostics](docs/SF-06-logging-and-diagnostics.md) | Structured logs, crash data, health and diagnostic bundles |
-| SF-07 | [Configuration Management](docs/SF-07-configuration-management.md) | Configuration sources, schema, precedence, secrets and migration |
-| SF-08 | [Runtime Foundation](docs/SF-08-runtime-foundation.md) | Lifecycle, storage, network, IPC, tasks and platform adapters |
-| SF-09 | [Security & Identity](docs/SF-09-security-and-identity.md) | Device identity, trust, authorization, secrets and software integrity |
-| SF-10 | [Compatibility & Testing](docs/SF-10-compatibility-and-testing.md) | Compatibility matrix, test strategy, golden corpus and release evidence |
+| SF-00 | [软件基础能力章程](docs/SF-00-foundation-charter.md) | 目标、原则、治理与采用机制 |
+| SF-01 | [软件版本管理规范](docs/SF-01-software-versioning.md) | 产品/构建/数据/协议版本与兼容策略 |
+| SF-02 | [代码仓库管理规范](docs/SF-02-repository-standard.md) | 仓库结构、Git 工作流、评审与依赖管理 |
+| SF-03 | [构建与 CI/CD 规范](docs/SF-03-build-and-cicd.md) | 可重复构建、流水线、制品与发布门禁 |
+| SF-04 | [软件发布与分发规范](docs/SF-04-release-and-distribution.md) | 制品身份、Manifest、发布渠道、存储与灰度 |
+| SF-05 | [软件安装与更新规范](docs/SF-05-installation-and-update.md) | 安装、下载、更新、恢复与回滚 |
+| SF-06 | [日志与诊断规范](docs/SF-06-logging-and-diagnostics.md) | 结构化日志、崩溃信息、健康检查与诊断包 |
+| SF-07 | [配置管理规范](docs/SF-07-configuration-management.md) | 配置来源、Schema、优先级、密钥与迁移 |
+| SF-08 | [运行时基础能力规范](docs/SF-08-runtime-foundation.md) | 生命周期、存储、网络、IPC 与平台适配 |
+| SF-09 | [安全与身份规范](docs/SF-09-security-and-identity.md) | 设备身份、信任、授权、密钥与软件完整性 |
+| SF-10 | [兼容性与测试规范](docs/SF-10-compatibility-and-testing.md) | 兼容矩阵、测试策略、黄金样本与发布证据 |
 
-## Recommended reading order
+## 推荐阅读顺序
 
-1. SF-00 — understand scope and governance.
-2. SF-01 and SF-10 — define compatibility promises before implementation.
-3. SF-02 and SF-03 — establish the development and build workflow.
-4. SF-04 and SF-05 — define how software is delivered and safely updated.
-5. SF-06 through SF-09 — define operational and runtime contracts.
+1. SF-00：理解范围与治理方式。
+2. SF-01、SF-10：在实现前明确兼容性承诺。
+3. SF-02、SF-03：建立研发与构建工作流。
+4. SF-04、SF-05：定义软件如何交付与安全更新。
+5. SF-06 至 SF-09：定义运行、诊断与安全契约。
 
-## Adoption model
+## 采用方式
 
-Each product creates a short **Foundation Adoption Record** identifying:
-- applicable standards and implementation status;
-- platform, architecture, distribution model and deployment environment;
-- selected tools and platform-specific adapters;
-- deviations, rationale, risk owner and expiry/review date;
-- evidence links for required checks.
+每个产品应创建一份**基础规范采用记录（Foundation Adoption Record）**，明确：
+- 适用规范及其实施状态；
+- 平台、架构、分发模式与部署环境；
+- 选用的工具及平台适配器；
+- 偏离项、原因、风险负责人及复审日期；
+- 必要检查项的证据链接。
 
-A project may adopt standards incrementally. Deviations require explicit approval; silently ignoring a MUST requirement is not an accepted deviation.
+项目可以分阶段采用规范。偏离强制要求必须经过明确批准；不记录原因而直接忽略 MUST 要求，不属于可接受的偏离。
 
-## Repository structure
+## 仓库定位
 
-```
-docs/
-  SF-00-foundation-charter.md
-  SF-01-software-versioning.md
-  ...
-  SF-10-compatibility-and-testing.md
-```
-
-Reusable code, CI templates, schemas and tools should be added only after the relevant contracts are reviewed and validated in at least one real product. This repository initially establishes the standards and boundaries; it is not yet a universal runtime SDK.
+本仓库首先沉淀标准和契约。只有在相关契约完成评审，并至少在一个真实产品中得到验证后，才逐步增加可复用代码、CI 模板、Schema 和工具。本仓库当前不是一个已经实现的通用运行时 SDK。

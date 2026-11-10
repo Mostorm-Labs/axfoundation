@@ -1,98 +1,98 @@
-# SF-03 — Build & CI/CD
+# SF-03 — 构建与 CI/CD 规范
 
-- **Status:** Proposed
-- **Version:** 1.0
-- **Owner:** Developer Infrastructure
-- **Related:** SF-01, SF-02, SF-04, SF-10
+- **状态：** 提案中
+- **版本：** 1.0
+- **负责人：** 研发基础设施
+- **关联规范：** SF-01、SF-02、SF-04、SF-10
 
-## 1. Purpose
+## 1. 目的
 
-Make code validation, build, packaging and release evidence repeatable. CI/CD templates should standardize pipeline stages while allowing each project to supply its native toolchain.
+让代码校验、构建、打包和发布证据可重复执行。CI/CD 模板应统一流水线阶段，同时允许项目使用自己的原生工具链。
 
-## 2. Pipeline classes
+## 2. 流水线类型
 
-| Pipeline | Trigger | Minimum responsibility |
+| 流水线 | 触发时机 | 最低职责 |
 |---|---|---|
-| Pull Request | PR opened/updated | Format/lint, static checks, unit tests, compile |
-| Integration | Merge to default branch | Full target build, integration tests, artifact smoke test |
-| Nightly | Scheduled | Expanded regression, compatibility, long-running tests |
-| Release | Approved tag or manual approval | Reproducible release build, signing, SBOM, provenance, publish |
-| Hotfix | Approved hotfix branch/tag | Focused validation plus mandatory release security/integrity checks |
+| Pull Request | PR 创建或更新 | 格式/Lint、静态检查、单元测试、编译 |
+| Integration | 合并到默认分支 | 全目标构建、集成测试、制品冒烟测试 |
+| Nightly | 定时执行 | 扩展回归、兼容性、长时间运行测试 |
+| Release | 经批准的 Tag 或手动审批 | 可重复发布构建、签名、SBOM、发布 |
+| Hotfix | 经批准的热修复分支/Tag | 定向验证及必要的发布安全/完整性检查 |
 
-## 3. Standard stages
+## 3. 标准流水线阶段
 
-1. **Checkout:** resolve exact commit and submodules.
-2. **Environment:** provision pinned compiler, SDK, toolchain and dependencies.
-3. **Quality:** formatting, lint, static analysis and policy checks.
-4. **Test:** unit, component, integration and compatibility tests appropriate to the change.
-5. **Build:** compile declared OS/architecture/configuration matrix.
-6. **Package:** create native distributables and metadata.
-7. **Verify:** inspect package, run install/launch smoke tests, validate checksums.
-8. **Secure:** scan dependencies, produce SBOM, sign artifacts and record provenance.
-9. **Publish:** upload immutable artifacts and release metadata.
-10. **Deploy:** promote through environments/channels with approval and health checks.
+1. **Checkout：** 获取精确 Commit 和子模块。
+2. **Environment：** 准备已锁定的编译器、SDK、工具链和依赖。
+3. **Quality：** 格式检查、Lint、静态分析和策略检查。
+4. **Test：** 按变更执行单元、组件、集成和兼容性测试。
+5. **Build：** 按声明的 OS/架构/配置矩阵编译。
+6. **Package：** 生成原生分发包和元数据。
+7. **Verify：** 检查安装包、执行安装/启动冒烟测试、校验摘要。
+8. **Secure：** 扫描依赖、生成 SBOM、签名制品并记录溯源信息。
+9. **Publish：** 上传不可变制品和发布元数据。
+10. **Deploy：** 通过审批和健康检查逐级推广到不同环境/渠道。
 
-A project MAY omit inapplicable stages, but MUST record why.
+项目可以省略不适用的阶段，但必须记录原因。
 
-## 4. Build reproducibility
+## 4. 构建可重复性
 
-Projects SHOULD pin:
-- compiler and SDK versions;
-- build tools and plugins;
-- dependency versions and lockfiles;
-- build flags and feature configuration;
-- container images or runner images where used.
+项目应该锁定：
+- 编译器和 SDK 版本；
+- 构建工具和插件；
+- 依赖版本及 Lockfile；
+- 构建参数和功能配置；
+- 使用时的容器镜像或 Runner 镜像。
 
-Builds MUST record source SHA and toolchain identity. Release artifacts MUST be built from a clean, known source revision. Avoid depending on untracked local files or developer machine state.
+构建必须记录源代码 SHA 和工具链身份。发布制品必须从干净且已知的源代码修订构建。不得依赖未跟踪的本地文件或开发人员机器状态。
 
-## 5. Build matrix
+## 5. 构建矩阵
 
-The project defines a supported matrix of:
-- OS and minimum OS version;
-- CPU architecture;
-- compiler/toolchain;
-- build configuration;
-- hardware variant where relevant.
+项目必须定义适用的：
+- OS 和最低 OS 版本；
+- CPU 架构；
+- 编译器/工具链；
+- 构建配置；
+- 必要时的硬件型号。
 
-Do not build every theoretical combination. The matrix should cover supported products and high-risk compatibility boundaries.
+不应构建所有理论组合。矩阵应覆盖实际支持的产品组合和高风险兼容边界。
 
-## 6. Quality gates
+## 6. 质量门禁
 
-At minimum, PR CI SHOULD run formatting/lint, compilation and unit tests. Release CI MUST run the tests designated as release-blocking by the product's verification plan.
+至少应在 PR CI 中运行格式/Lint、编译和单元测试。Release CI 必须运行产品验证计划中标记为发布阻断项的测试。
 
-Flaky tests MUST be tracked and corrected; silently disabling a failing test is not an acceptable permanent workaround. Exceptions require owner, rationale and expiry.
+不稳定测试必须被跟踪并修复；不能把静默禁用失败测试作为长期解决方案。例外必须记录负责人、理由和到期时间。
 
-## 7. Artifact contract
+## 7. 制品契约
 
-Every produced artifact MUST be associated with:
-- repository and source commit;
-- product/build version;
-- workflow run and build configuration;
-- target platform and architecture;
-- artifact filename, size and SHA-256 digest;
-- signing status and signer identity where applicable;
-- SBOM and provenance references where supported.
+每个构建制品必须关联：
+- 仓库和源代码 Commit；
+- 产品/构建版本；
+- 工作流运行记录和构建配置；
+- 目标平台和架构；
+- 文件名、大小和 SHA-256 摘要；
+- 适用时的签名状态和签名者身份；
+- 支持时的 SBOM 和构建溯源信息。
 
-Artifacts MUST be immutable after publication. A corrected build receives a new build identity.
+制品发布后必须不可变。修正后的构建应获得新的构建身份。
 
-## 8. Secrets and permissions
+## 8. 密钥与权限
 
-Use least-privilege workflow permissions. Separate build credentials from release-signing credentials. Signing keys MUST NOT be exposed to untrusted pull-request workflows. Production publication SHOULD require protected environments or explicit approval.
+工作流必须采用最小权限。构建凭据与发布签名凭据必须分离。签名密钥不得暴露给不可信的 Pull Request 工作流。生产发布应该通过受保护环境或显式审批完成。
 
-## 9. Deployment safety
+## 9. 部署安全
 
-Deployments SHOULD support staged promotion (internal → beta → stable), health checks and stop/rollback controls. Deployment success must be based on observable outcomes, not merely a successful upload.
+在部署模式允许时，应该支持分阶段推广（内部 → Beta → Stable）、健康检查以及暂停/回滚控制。部署成功必须基于可观测结果，不能仅以文件上传成功为准。
 
-## 10. Tooling guidance
+## 10. 工具建议
 
-GitHub Actions is a suitable default for repositories hosted on GitHub. Self-hosted runners may be needed for Windows signing, specialized SDKs, hardware access or network-isolated builds. Runner images and maintenance ownership must be documented.
+托管在 GitHub 的仓库可以优先采用 GitHub Actions。Windows 签名、特殊 SDK、硬件访问或隔离网络构建可能需要自托管 Runner。必须记录 Runner 镜像和维护负责人。
 
-## 11. Acceptance checklist
+## 11. 验收清单
 
-- [ ] PR pipeline runs required checks.
-- [ ] Release build uses a clean, identified revision.
-- [ ] Target matrix is explicit.
-- [ ] Artifact metadata and digest are generated.
-- [ ] Secrets are isolated from untrusted workflows.
-- [ ] Release artifacts are immutable and traceable.
-- [ ] Failed release checks prevent publication unless an approved exception exists.
+- [ ] PR 流水线执行必要检查。
+- [ ] 发布构建使用干净且可识别的源代码修订。
+- [ ] 目标构建矩阵明确。
+- [ ] 自动生成制品元数据和摘要。
+- [ ] 密钥与不可信工作流隔离。
+- [ ] 发布制品不可变且可追溯。
+- [ ] 发布检查失败时禁止发布，除非存在经批准的例外。

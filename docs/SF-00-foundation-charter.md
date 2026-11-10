@@ -1,104 +1,104 @@
-# SF-00 — Software Foundation Charter
+# SF-00 — 软件基础能力章程
 
-- **Status:** Proposed
-- **Version:** 1.0
-- **Owner:** Software Engineering / Innovation Division
-- **Applies to:** Software products, services, desktop/mobile applications, device agents, embedded software and their delivery pipelines
+- **状态：** 提案中
+- **版本：** 1.0
+- **负责人：** 软件工程 / 创新事业部
+- **适用范围：** 软件产品、服务端服务、桌面/移动应用、设备代理程序、嵌入式软件及其交付流水线
 
-## 1. Purpose
+## 1. 目的
 
-AX Foundation reduces repeated engineering work and inconsistent product quality by defining shared software engineering contracts. It establishes what should be common across products while preserving legitimate differences between operating systems, languages, runtimes and deployment models.
+AX Foundation 通过定义跨产品共享的软件工程契约，减少重复劳动和产品质量差异。它明确哪些能力应该统一，同时保留操作系统、编程语言、运行时和部署模式之间合理的差异。
 
-## 2. Goals
+## 2. 建设目标
 
-1. New projects start from known engineering defaults rather than rediscovering basic practices.
-2. Every shipped artifact has traceable source, version, build and release identity.
-3. Software can be installed, updated, diagnosed and supported predictably.
-4. Historical data and supported clients are protected by explicit compatibility policy.
-5. Platform-specific behavior is isolated behind documented adapters.
-6. Shared tooling is introduced only when a stable contract and demonstrated reuse exist.
+1. 新项目能够基于成熟的工程默认方案启动，而不是重复摸索基础实践。
+2. 每个交付制品都能追溯到源代码、版本、构建过程和发布身份。
+3. 软件能够以可预测的方式安装、更新、诊断和维护。
+4. 通过明确的兼容性策略保护历史数据和受支持的客户端。
+5. 将平台差异隔离在有文档定义的平台适配器中。
+6. 只有在契约稳定且复用价值得到验证后，才建设共享工具和组件。
 
-## 3. Non-goals
+## 3. 非目标
 
-- Mandating one programming language, UI framework, build system or package format.
-- Replacing OS-native lifecycle, security, installer or application-store mechanisms.
-- Building a distributed management platform before product needs justify it.
-- Promising compatibility with every historical OS, device or client version indefinitely.
-- Abstracting hardware-specific behavior into a lowest-common-denominator API.
+- 强制所有产品使用同一种编程语言、UI 框架、构建系统或包格式。
+- 替代操作系统原生的生命周期、安全、安装器或应用商店机制。
+- 在产品需求尚未明确前建设庞大的集中式管理平台。
+- 承诺永久兼容所有历史操作系统、设备或客户端版本。
+- 将硬件特有行为抽象成能力最低的公共接口。
 
-## 4. Design principles
+## 4. 设计原则
 
-### 4.1 Contracts before shared code
-Define semantics, inputs, outputs, failure behavior and compatibility guarantees before implementing a reusable library.
+### 4.1 先定义契约，再编写公共代码
+在实现可复用库之前，先定义语义、输入、输出、失败行为和兼容性保证。
 
-### 4.2 Common semantics, native realization
-A shared interface may have different implementations on Windows, Linux, macOS, Android, iOS, Web and embedded targets. Platform limitations must remain visible.
+### 4.2 统一语义，原生实现
+Windows、Linux、macOS、Android、iOS、Web 和嵌入式平台可以采用不同实现。平台限制必须显式可见。
 
-### 4.3 Traceability by default
-A release must be traceable to source revision, build workflow, dependencies, target platform, artifact digest and release channel.
+### 4.3 默认具备可追溯性
+每次发布都必须能够追溯到源代码修订、构建工作流、依赖、目标平台、制品摘要和发布渠道。
 
-### 4.4 Fail safely
-Integrity failures, unsupported migrations, invalid configuration and incomplete updates must fail explicitly. Never silently discard data or bypass signature verification.
+### 4.4 安全失败
+完整性校验失败、不支持的数据迁移、无效配置和未完成更新必须明确失败。禁止静默丢弃数据或绕过签名验证。
 
-### 4.5 Least privilege and privacy
-Collect only operational data needed to diagnose or operate the product. Protect credentials and redact sensitive values from logs and support bundles.
+### 4.5 最小权限与隐私保护
+只收集运行和维护所必需的数据。保护凭据，并在日志和支持诊断包中脱敏敏感信息。
 
-### 4.6 Incremental adoption
-Prefer standards and templates first, then small libraries and tools, then centralized services where justified.
+### 4.6 渐进式采用
+优先建立规范和模板，再沉淀小型库与工具，最后在确有需要时建设集中式服务。
 
-## 5. Capability taxonomy
+## 5. 能力分类
 
-| Domain | Shared contract | Platform-specific realization |
+| 领域 | 统一契约 | 平台特定实现 |
 |---|---|---|
-| Versioning | Version fields and compatibility policy | Native package/build metadata |
-| Repository | Branch, review and dependency policy | Git hosting and repository settings |
-| CI/CD | Pipeline stages and evidence | Runner, compiler and build system |
-| Release | Artifact manifest and channel semantics | Storage, CDN and signing service |
-| Install/update | State machine and safety invariants | MSI, DEB, app store, OTA, etc. |
-| Diagnostics | Log schema, error taxonomy, bundle layout | OS log and crash APIs |
-| Configuration | Schema, precedence and migration rules | Registry, files, preferences, remote config |
-| Runtime | Lifecycle and service contracts | systemd, Windows Service, app lifecycle |
-| Security | Identity and trust requirements | DPAPI, Keychain, Keystore, TPM, secure element |
-| Compatibility | Matrix and evidence model | Platform-specific test environments |
+| 版本管理 | 版本字段和兼容策略 | 原生包/构建元数据 |
+| 仓库管理 | 分支、评审和依赖策略 | Git 托管与仓库设置 |
+| CI/CD | 流水线阶段和证据 | Runner、编译器和构建系统 |
+| 发布 | 制品 Manifest 和渠道语义 | 存储、CDN、签名服务 |
+| 安装/更新 | 状态机和安全不变量 | MSI、DEB、应用商店、OTA 等 |
+| 诊断 | 日志 Schema、错误分类、诊断包结构 | OS 日志与崩溃 API |
+| 配置 | Schema、优先级和迁移规则 | 注册表、文件、偏好设置、远程配置 |
+| 运行时 | 生命周期与服务契约 | systemd、Windows Service、应用生命周期 |
+| 安全 | 身份与信任要求 | DPAPI、Keychain、Keystore、TPM、安全芯片 |
+| 兼容性 | 矩阵与证据模型 | 平台专属测试环境 |
 
-## 6. Normative language
+## 6. 规范用语
 
-- **MUST / MUST NOT:** mandatory for conforming projects unless an approved deviation exists.
-- **SHOULD / SHOULD NOT:** recommended; deviations require documented reasoning.
-- **MAY:** optional.
+- **必须（MUST）/ 禁止（MUST NOT）：** 强制要求，除非存在经过批准的偏离项。
+- **应该（SHOULD）/ 不应该（SHOULD NOT）：** 推荐要求；偏离时应记录理由。
+- **可以（MAY）：** 可选要求。
 
-A standard is not automatically implemented merely because it is documented. Each project records adoption status and evidence.
+规范写入文档不代表已经实现。每个项目都必须记录采用状态和相应证据。
 
-## 7. Governance and change control
+## 7. 治理与变更管理
 
-- This repository is the canonical home for AX Foundation standards.
-- Each standard has an ID, version, status, owner, scope and change history.
-- Changes are proposed through Pull Requests.
-- Breaking changes require a migration note and an explicit effective version.
-- Product-specific exceptions belong in that product's adoption record, not as undocumented edits to the common standard.
-- Standards are reviewed at least annually and when a significant security, platform or operational requirement changes.
+- 本仓库是 AX Foundation 规范的唯一正式存放位置。
+- 每份规范必须包含编号、版本、状态、负责人、适用范围和变更历史。
+- 规范变更通过 Pull Request 提出。
+- 破坏性变更必须附带迁移说明和明确生效版本。
+- 产品特有的例外记录在产品采用记录中，不应通过未记录的修改改变公共规范。
+- 至少每年评审一次；重大安全、平台或运维要求变化时应及时评审。
 
-## 8. Adoption record template
+## 8. 采用记录模板
 
-Each product should maintain `docs/foundation-adoption.md` with:
+每个产品应在 `docs/foundation-adoption.md` 中记录：
 
-| Field | Required information |
+| 字段 | 必须记录的信息 |
 |---|---|
-| Product / owner | Product name and accountable engineering owner |
-| Release model | Desktop, service, mobile, web, firmware, appliance |
-| Platforms | OS versions, CPU architectures and hardware variants |
-| Standards | SF-01…SF-10 status: adopted / partial / not applicable |
-| Toolchain | Repository, CI, build, package and distribution tools |
-| Update model | Manual, in-app, service-managed, store, OTA, offline |
-| Diagnostics | Log location, retention, crash and support-bundle process |
-| Deviations | Requirement, rationale, risk, approver and review date |
-| Evidence | Links to tests, workflows, manifests and release records |
+| 产品/负责人 | 产品名称及承担责任的研发负责人 |
+| 发布形态 | 桌面、服务端、移动端、Web、固件、设备 |
+| 平台 | OS 版本、CPU 架构、硬件型号 |
+| 规范状态 | SF-01 至 SF-10：已采用/部分采用/不适用 |
+| 工具链 | 仓库、CI、构建、打包和分发工具 |
+| 更新模式 | 手动、应用内、服务管理、应用商店、OTA、离线 |
+| 诊断能力 | 日志位置、保留策略、崩溃及诊断包流程 |
+| 偏离项 | 要求、原因、风险、批准人、复审日期 |
+| 证据 | 测试、工作流、Manifest 和发布记录链接 |
 
-## 9. Conformance levels
+## 9. 符合性等级
 
-- **Level 0 — Recorded:** project has an adoption record and declared exceptions.
-- **Level 1 — Engineering baseline:** repository, versioning, CI, artifact traceability and basic diagnostics conform.
-- **Level 2 — Operable release:** distribution, installation/update safety, compatibility tests and security controls conform.
-- **Level 3 — Managed product:** remote diagnostics, staged rollout, health reporting and lifecycle governance are implemented where applicable.
+- **L0 — 已登记：** 项目有采用记录，并声明例外。
+- **L1 — 工程基线：** 仓库、版本管理、CI、制品可追溯性和基础诊断符合要求。
+- **L2 — 可运维交付：** 分发、安装/更新安全、兼容性测试和安全控制符合要求。
+- **L3 — 产品化管理：** 在适用场景下具备远程诊断、分阶段发布、健康状态上报和生命周期治理。
 
-A project should not claim a level without evidence.
+项目只有具备相应证据时，才能声明达到某个等级。

@@ -1,34 +1,34 @@
-# SF-04 — Release & Distribution
+# SF-04 — 软件发布与分发规范
 
-- **Status:** Proposed
-- **Version:** 1.0
-- **Owner:** Release Engineering
-- **Related:** SF-01, SF-03, SF-05, SF-09
+- **状态：** 提案中
+- **版本：** 1.0
+- **负责人：** 发布工程
+- **关联规范：** SF-01、SF-03、SF-05、SF-09
 
-## 1. Purpose
+## 1. 目的
 
-Define how signed, identifiable software artifacts move from CI to users, devices and customer environments.
+定义已签名、可识别的软件制品如何从 CI 流水线交付给用户、设备和客户环境。
 
-## 2. Artifact identity
+## 2. 制品身份
 
-An artifact is identified by product ID, product version, build ID, target platform, architecture, package format and cryptographic digest. Filenames are descriptive but MUST NOT be treated as identity or integrity proof.
+制品身份由产品 ID、产品版本、构建 ID、目标平台、架构、包格式和加密摘要共同确定。文件名仅用于描述，不能作为身份或完整性证明。
 
-Published artifacts MUST be immutable. Replacing bytes at an existing release URL is prohibited; publish a new build/revision.
+已发布制品必须不可变。禁止在已有 Release URL 下替换文件内容；新内容必须以新的构建/修订发布。
 
-## 3. Release channels
+## 3. 发布渠道
 
-Recommended channel semantics:
-- **dev:** continuously changing engineering builds; no customer stability promise.
-- **beta:** pre-release validation with explicit feedback expectations.
-- **stable:** supported production release.
-- **lts:** optional long-term support line with separate maintenance commitment.
-- **customer/private:** controlled distribution for named customers or environments.
+建议定义以下渠道语义：
+- **dev：** 持续变化的研发构建，不承诺客户稳定性。
+- **beta：** 预发布验证，明确反馈预期。
+- **stable：** 正式生产发布。
+- **lts：** 可选长期支持版本线，具有独立维护承诺。
+- **customer/private：** 面向指定客户或环境的受控分发。
 
-A product may use fewer channels. Channel promotion MUST be explicit and auditable.
+产品可以采用更少的渠道。渠道推广必须明确且可审计。
 
-## 4. Release manifest
+## 4. 发布 Manifest
 
-A machine-readable manifest SHOULD contain at least:
+机器可读 Manifest 应至少包含以下信息：
 
 ```json
 {
@@ -67,52 +67,52 @@ A machine-readable manifest SHOULD contain at least:
 }
 ```
 
-This is illustrative, not a finalized JSON Schema. A production schema MUST define required fields, validation, signature envelope, URL policy, rollback semantics and forward-compatibility behavior. Manifest schema version is independent of product version.
+以上仅为示例，并非最终 JSON Schema。生产 Schema 必须定义必填字段、校验规则、签名封装、URL 策略、回滚语义和前向兼容行为。Manifest Schema 版本独立于产品版本。
 
-## 5. Distribution service responsibilities
+## 5. 分发服务职责
 
-A distribution service or storage/CDN arrangement SHOULD provide:
-- immutable artifact storage;
-- manifest lookup by product/channel/platform/architecture;
-- authentication and authorization for private releases;
-- resumable downloads and range requests where supported;
-- regional mirrors/CDN;
-- download observability without collecting unnecessary personal data;
-- retention and archival policy.
+分发服务或对象存储/CDN 方案应该提供：
+- 不可变制品存储；
+- 按产品/渠道/平台/架构查询 Manifest；
+- 私有发布的认证和授权；
+- 支持时的断点续传与 Range 请求；
+- 区域镜像/CDN；
+- 不收集不必要个人数据的下载可观测性；
+- 保留和归档策略。
 
-The client MUST validate the downloaded artifact independently of transport success.
+客户端必须独立验证下载制品，不能将传输成功等同于制品可信。
 
-## 6. Integrity and authenticity
+## 6. 完整性与真实性
 
-SHA-256 detects corruption but does not prove publisher identity. Production artifacts MUST use a trusted digital signature or equivalent authenticated release metadata. Clients MUST verify signature and digest before installation. Trust roots and key rotation/revocation procedures MUST be documented.
+SHA-256 用于检测文件损坏，但不能证明发布者身份。生产制品必须使用可信数字签名或等效的认证发布元数据。客户端安装前必须验证签名和摘要。必须定义信任根、密钥轮换和吊销流程。
 
-## 7. Rollout
+## 7. 灰度发布
 
-Stable releases SHOULD support staged rollout where the deployment model permits:
-1. internal validation;
-2. limited beta/customer cohort;
-3. small stable cohort;
-4. wider rollout;
-5. full availability.
+在部署模式允许时，Stable 发布应该支持分阶段推广：
+1. 内部验证；
+2. 小范围 Beta/客户群；
+3. 小比例 Stable 用户；
+4. 扩大推广范围；
+5. 全量开放。
 
-Rollout controls MUST be reversible. A bad release can be withdrawn or superseded, but already installed software requires an explicit recovery/update plan.
+灰度控制必须可以撤回。发现问题后可以撤下或发布替代版本，但对已安装的软件仍必须定义明确的恢复/更新方案。
 
-## 8. Retention and support
+## 8. 保留与支持
 
-Define retention for:
-- current stable and supported previous releases;
-- installer and offline update packages;
-- manifests and signatures;
-- SBOM/provenance;
-- release notes and test evidence.
+必须定义以下内容的保留策略：
+- 当前 Stable 和受支持的历史版本；
+- 安装包和离线更新包；
+- Manifest 和签名；
+- SBOM/构建溯源信息；
+- 发布说明和测试证据。
 
-Do not delete an artifact still required by a supported upgrade or recovery path.
+只要某个制品仍是受支持升级或恢复路径所必需，就不得删除。
 
-## 9. Acceptance checklist
+## 9. 验收清单
 
-- [ ] Every artifact has immutable identity and digest.
-- [ ] Manifest is validated against a versioned schema.
-- [ ] Signature verification is defined and enforced.
-- [ ] Channels and promotion rules are documented.
-- [ ] Rollout can be paused or withdrawn.
-- [ ] Supported recovery artifacts remain available.
+- [ ] 每个制品都有不可变身份和摘要。
+- [ ] Manifest 按版本化 Schema 校验。
+- [ ] 签名验证机制已定义并强制执行。
+- [ ] 发布渠道和推广规则明确。
+- [ ] 灰度发布可以暂停或撤回。
+- [ ] 受支持的恢复制品持续保留。
